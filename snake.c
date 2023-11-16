@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#ifdef WIN32
+#include <conio.h>
+#else
 #include <termios.h>
 
 struct termios orig_termios;
@@ -44,6 +47,7 @@ int getch()
         return c;
     }
 }
+#endif
 
 typedef struct {
     int x;
@@ -100,16 +104,20 @@ int main() {
     Body apple;
     apple.x = rand() % 80;
     apple.y = rand() % 24;
+    #ifndef WIN32
     set_conio_terminal_mode();
+    #endif
     printf("\ec");
     while(1) {
         if (kbhit()) {
             char c = getch();
             if (c == '\e') {
                 if (!kbhit()) { // we need this to prevent arrow keys from exiting the game
-                  reset_terminal_mode();
-                  printf("\ecThanks for playing! Score: %d\n", length);
-                  return 0;
+                    #ifndef WIN32
+                    reset_terminal_mode();
+                    #endif
+                    printf("\ecThanks for playing! Score: %d\n", length);
+                    return 0;
                 }
             }
             if (c == 'w' || c == 'W') {
@@ -137,7 +145,9 @@ int main() {
             apple.y = rand() % 24;
         }
         if (snakeTouchingItself()) {
+            #ifndef WIN32
             reset_terminal_mode();
+            #endif
             printf("\ecYou died! Score: %d\n", length);
             return 0;
         }
